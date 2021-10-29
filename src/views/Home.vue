@@ -4,7 +4,7 @@
   </div>
 </template>
 <script>
-import FormDesign from "@/components/form-design";
+import FormDesign from "@/components/form-design/index.vue";
 export default {
   components: {
     FormDesign,

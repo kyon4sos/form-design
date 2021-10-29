@@ -1,7 +1,7 @@
 <template>
-  <div class="tool">
-    <h3>Setting</h3>
-    <a-form>
+  <div class="tool shadow">
+    <h3 class="title border-bottom">Paper</h3>
+    <a-form class="p-4">
       <!-- <a-form-item
         label="width"
         :wrapper-col="{ span: 6 }"
@@ -16,20 +16,20 @@
       >
         <a-input></a-input>
       </a-form-item> -->
-      <a-row :gutter="10">
+      <a-row :gutter="4">
         <a-col :span="12">
           <a-form-item label="width">
-            <a-input @change="hanldeWidth"></a-input>
+            <a-input v-model="width" @change="handleWidth"></a-input>
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="heigth">
-            <a-input></a-input>
+          <a-form-item label="height">
+            <a-input v-model="height" @change="handleHeight"></a-input>
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
-    <h3>Tool</h3>
+    <h3 class="title border-bottom">Tool</h3>
     <!-- <draggable
       class="tool-box"
       v-model="tools"
@@ -40,7 +40,7 @@
         {{ tool.name }}
       </span>
     </draggable> -->
-    <div class="tool-box">
+    <div class="tool-box p-4">
       <span
         class="tool-item"
         v-for="tool in tools"
@@ -63,11 +63,20 @@ import { mapMutations } from "vuex";
 export default {
   data() {
     return {
+      width: 800,
+      height: 600,
       tools: [
         {
           name: "公司名称",
           id: "1",
+          element: "company-name",
+          size: 20,
+          weight: 400,
+          label: "公司名称1",
           style: {
+            width: "300px",
+          },
+          pos: {
             left: "10px",
             top: "10px",
           },
@@ -88,7 +97,19 @@ export default {
     };
   },
   methods: {
-    ...mapMutations(["setElements"]),
+    ...mapMutations([
+      "setElements",
+      "setPaperWidth",
+      "setPaperHeight",
+      "setCurrent",
+      "setShowPanel",
+    ]),
+    handleWidth() {
+      this.setPaperWidth(this.width);
+    },
+    handleHeight() {
+      this.setPaperHeight(this.height);
+    },
     handleEnter() {
       // console.log("enter", e.tartget);
     },
@@ -102,6 +123,8 @@ export default {
       console.log(tool);
       // e.dataTransfer.setData("text/plain", e.target.id);
       // console.log("start", e.target.id);
+      this.setShowPanel(true);
+      this.setCurrent(tool);
       this.setElements(tool);
     },
   },
@@ -114,8 +137,9 @@ export default {
 <style lang="scss">
 .tool {
   width: 400px;
+  min-width: 400px;
   height: 100%;
-  padding: 8px 8px;
+  background-color: #fff;
   box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.2);
   .ant-form-item {
     display: flex;

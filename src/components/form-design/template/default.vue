@@ -4,21 +4,25 @@
   <div
     class="default-template"
     ref="container"
+    :style="{ width: paperWidth + 'px', height: paperHeight + 'px' }"
     @mouseup="handleMouseUp"
     @mousemove="handleMouseMove"
   >
     <!-- @dragstart="(e) => handleStart(ele, e)" -->
     <!-- @dragend="(e) => handleEnd(ele, e)" -->
-    <div
+    <Element
       class="element-item"
       :class="ele.className"
       v-for="ele in elements"
       :key="ele.id"
-      :style="ele.style"
+      :styl="ele.style"
+      :active.sync="ele.active"
+      :label="ele.label"
+      :element="ele.element"
       @mousedown.stop="handleMouseDown(ele, $event)"
     >
       {{ ele.name }}
-    </div>
+    </Element>
     <!-- <VueDragResize
       v-for="(ele, index) in elements"
       :key="index"
@@ -64,24 +68,43 @@
         {{ ele.name }}
       </div>
     </draggable> -->
+    <setting-panel
+      :visible.sync="showPanel"
+      :size="current.size"
+      :label="current.label"
+      :weight="current.weight"
+      @change="handleChange"
+    ></setting-panel>
   </div>
 </template>
 
 <script>
 // import draggable from "vuedraggable";
+import SettingPanel from "../panel/setting.vue";
+import Element from "../element/index.vue";
 import { mapState, mapMutations } from "vuex";
 // import VueDragResize from "vue-drag-resize";
 export default {
   data() {
     return {
-      current: null,
       isMove: false,
       left: 0,
       top: 0,
+      screenWidth: 0,
+      screenHeight: 0,
+      offetX: 0,
+      offetY: 0,
     };
   },
+
   computed: {
-    ...mapState(["elements"]),
+    ...mapState([
+      "elements",
+      "paperWidth",
+      "paperHeight",
+      "current",
+      "showPanel",
+    ]),
     conWidth() {
       return this.$refs.container.clientWidth;
     },
@@ -89,11 +112,23 @@ export default {
       return this.$refs.container.clientHeight;
     },
   },
-
+  mounted() {
+    const { left, top } = this.$refs.container.getBoundingClientRect();
+    this.left = left;
+    this.top = top;
+    console.log(left, top);
+  },
   methods: {
-    ...mapMutations(["setElements"]),
+    ...mapMutations(["setElements", "setCurrent"]),
     handleDragover(e) {
       e.preventDefault();
+    },
+    handleChange(val) {
+      console.log(val);
+      this.setCurrent(val);
+    },
+    onClickOutside() {
+      console.log("defaut outside");
     },
     handleDrop() {
       // const left,top =  e.x, e.y;
@@ -111,34 +146,30 @@ export default {
       console.log(x, y);
     },
     handleMouseDown(ele, e) {
-      this.current = ele;
-      const { x, y } = e;
-      let { left, top } = e.target.style;
-      this.left = parseInt(left);
-      this.top = parseInt(top);
-      console.log(this.left, this.top);
-      console.log("down", x, y);
+      this.setCurrent(ele);
+      console.log(e);
+      // const { x, y } = e;
+      // let { left, top } = e.target.style;
+      // this.left = parseInt(left);
+      // this.top = parseInt(top);
+      // console.log(this.left, this.top);
+      // console.log("down", x, y);
+      this.$set(this.current, "active", true);
       this.$set(this.current, "className", "select");
       this.isMove = true;
     },
-    handleMouseUp(e) {
+    handleMouseUp() {
       this.isMove = false;
-      console.log("up", e.target);
     },
     handleMouseMove(e) {
       if (this.isMove) {
-        // console.log("move", e);
         let { x, y } = e;
-        let { offsetWidth, offsetHeight } = e.target;
-        // let left = x - offsetWidth / 2;
-        // let top = x - offsetHeight / 2;
-        console.log(offsetWidth, offsetHeight);
-        let left =
-          x + offsetWidth >= this.conWidth ? this.conWidth - offsetWidth : x;
-        let top = y;
+        console.log(x, y);
+        x = x - this.left;
+        y = y - this.top;
         const style = {
-          left: `${left}px`,
-          top: `${top}px`,
+          left: `${x}px`,
+          top: `${y}px`,
         };
         this.$set(this.current, "style", style);
       }
@@ -176,6 +207,8 @@ export default {
     },
   },
   components: {
+    Element,
+    SettingPanel,
     // draggable,
     // VueDragResize,
   },
@@ -184,13 +217,12 @@ export default {
 
 <style lang="scss">
 .default-template {
-  width: 100%;
-  height: 100%;
   background: #ffffff;
   box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.2);
   border: 1px #999 solid;
   position: relative;
-  user-select: none;
+  // user-select: none;
+  z-index: 2;
   .template {
     width: 100%;
     height: 100%;
@@ -198,10 +230,10 @@ export default {
   }
   .element-item {
     display: inline-block;
-    background-color: red;
     position: absolute;
     // transition: all 0.2s ease;
     transform-origin: center;
+    // pointer-events: none;
   }
   .active {
     border: 1px solid var(--primaryColor);
@@ -209,25 +241,25 @@ export default {
     cursor: move;
   }
   .select {
-    &::before {
-      width: 1000vw;
-      height: 1px;
-      border-top: 1px dashed #999;
-      display: inline-block;
-      content: "";
-      position: absolute;
-      left: -500vw;
-    }
-    &::after {
-      width: 1px;
-      height: 1000vh;
-      border-left: 1px dashed #999;
-      display: inline-block;
-      content: "";
-      position: absolute;
-      top: -500vh;
-      left: 0;
-    }
+    // &::before {
+    //   width: 1000vw;
+    //   height: 1px;
+    //   border-top: 1px dashed #999;
+    //   display: inline-block;
+    //   content: "";
+    //   position: absolute;
+    //   left: -500vw;
+    // }
+    // &::after {
+    //   width: 1px;
+    //   height: 1000vh;
+    //   border-left: 1px dashed #999;
+    //   display: inline-block;
+    //   content: "";
+    //   position: absolute;
+    //   top: -500vh;
+    //   left: 0;
+    // }
   }
 }
 </style>
