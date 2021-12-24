@@ -5,11 +5,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    current: {
-      size: 14,
-      weight: 400,
-      label: "label",
-    },
+    current: {},
     showPanel: false,
     elements: [],
     paperWidth: 800,
@@ -19,9 +15,15 @@ export default new Vuex.Store({
     setShowPanel(state, data) {
       state.showPanel = data;
     },
-    setCurrent(state, data) {
-      console.log("set cur", data);
-      state.current = { ...data };
+    setCurrent(state, cur) {
+      state.current = cur;
+    },
+    setStyle(state, style) {
+      const idx = state.elements.findIndex((e) => e.id == state.current["id"]);
+      console.log(idx);
+      if (idx != -1) {
+        state.elements[idx].style = style;
+      }
     },
     setElements(state, data) {
       state.elements.push(data);

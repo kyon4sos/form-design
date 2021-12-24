@@ -1,18 +1,18 @@
 <template>
   <div class="home">
-    <form-design></form-design>
+    <form-editor></form-editor>
   </div>
 </template>
 <script>
-import FormDesign from "@/components/form-design/index.vue";
+import FormEditor from "@/components/form-editor/index.vue";
 export default {
   components: {
-    FormDesign,
+    FormEditor,
   },
 };
 </script>
 <style lang="scss">
 .home {
-  height: 100%;
+  width: 100%;
 }
 </style>
